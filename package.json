@@ -1,0 +1,13 @@
+{
+  "name": "phishing-detector",
+  "version": "1.0.0",
+  "description": "Phishing CLI Scanner client",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
