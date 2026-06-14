@@ -1,5 +1,5 @@
 # Phishing Detection with Extension 🚀
-
+A modern full‑stack phishing‑url detection system built with Django, Next.js (TSX) and PostgreSQL.
 ## ✨ Overview
 
 **Phishing Detection with Extension** is a modern, full‑stack application that scans URLs for phishing threats using a **weighted heuristic engine** combined with **real‑time intelligence from three security vendors** (Google Safe Browsing, VirusTotal, and IPQualityScore).  It provides:
@@ -64,8 +64,8 @@ Phishing_Detection_with_Extension/
 ### 2️⃣ Clone the Repository
 
 ```powershell
-git clone https://github.com/yourusername/Phishing_Detection_with_Extension.git
-cd Phishing_Detection_with_Extension
+git clone https://github.com/PraveenChigurla/Phishing_Website_Detector.git
+cd Phishing_Website_Detector  
 ```
 
 ### 3️⃣ Backend Setup
