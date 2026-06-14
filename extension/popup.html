@@ -37,23 +37,43 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      width: 380px;
-      min-height: 500px;
-      max-height: 600px;
-      overflow-y: auto;
-      background: var(--bg);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--slate-100);
+    html {
+      background: #05070f;
     }
 
-    body::-webkit-scrollbar { width: 4px; }
-    body::-webkit-scrollbar-track { background: transparent; }
-    body::-webkit-scrollbar-thumb { background: var(--purple-700); border-radius: 4px; }
+    body {
+      width: 380px;
+      min-height: 516px;
+      max-height: 616px;
+      background: #05070f;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--slate-100);
+      padding: 8px;
+      overflow: hidden;
+    }
+
+    .popup-card {
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+      max-height: 600px;
+      background: var(--bg);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: 16px; /* Curved edges for the extension shape */
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    .popup-card::-webkit-scrollbar { width: 4px; }
+    .popup-card::-webkit-scrollbar-track { background: transparent; }
+    .popup-card::-webkit-scrollbar-thumb { background: var(--purple-700); border-radius: 4px; }
 
     /* ── Ambient glow ────────────────────────────── */
     .glow {
-      position: fixed;
+      position: absolute;
       top: -60px;
       left: 50%;
       transform: translateX(-50%);
@@ -401,191 +421,70 @@
   </style>
 </head>
 <body>
+  <div class="popup-card">
+    <div class="glow"></div>
 
-  <div class="glow"></div>
-
-  <!-- Header -->
-  <div class="header">
-    <div class="header-icon">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-      </svg>
-    </div>
-    <div>
-      <div class="header-title">PHISHING DETECTOR PRO</div>
-      <div class="header-sub">AI-Powered Threat Analysis</div>
-    </div>
-    <div class="status-dot" id="statusDot" title="Backend: Online"></div>
-  </div>
-
-  <!-- Scanner -->
-  <div class="section">
-    <div class="scan-card">
-      <div class="scan-label">🔗 Scan a URL</div>
-      <div class="input-wrapper">
-        <input type="text" class="url-input" id="urlInput" placeholder="https://suspicious-site.com" />
-        <button class="scan-btn" id="scanBtn">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          Scan
-        </button>
+    <!-- Header -->
+    <div class="header">
+      <div class="header-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
       </div>
+      <div>
+        <div class="header-title">PHISHING DETECTOR PRO</div>
+        <div class="header-sub">AI-Powered Threat Analysis</div>
+      </div>
+      <div class="status-dot" id="statusDot" title="Backend: Online"></div>
+    </div>
 
-      <!-- Result -->
-      <div id="resultCard" class="result-card hidden">
-        <div class="result-verdict">
-          <div class="verdict-icon" id="verdictIcon"></div>
-          <div class="verdict-text" id="verdictText"></div>
-          <div class="result-score" id="scoreText"></div>
+    <!-- Scanner -->
+    <div class="section">
+      <div class="scan-card">
+        <div class="scan-label">🔗 Scan a URL</div>
+        <div class="input-wrapper">
+          <input type="text" class="url-input" id="urlInput" placeholder="https://suspicious-site.com" />
+          <button class="scan-btn" id="scanBtn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            Scan
+          </button>
         </div>
 
-        <div class="score-bar-container">
-          <div class="score-bar-bg">
-            <div class="score-bar-fill" id="scoreBar" style="width: 0%"></div>
+        <!-- Result -->
+        <div id="resultCard" class="result-card hidden">
+          <div class="result-verdict">
+            <div class="verdict-icon" id="verdictIcon"></div>
+            <div class="verdict-text" id="verdictText"></div>
+            <div class="result-score" id="scoreText"></div>
+          </div>
+
+          <div class="score-bar-container">
+            <div class="score-bar-bg">
+              <div class="score-bar-fill" id="scoreBar" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="votes-grid" id="votesGrid"></div>
+
+          <div class="reasons-section hidden" id="reasonsSection">
+            <div class="reasons-title">Detection Signals</div>
+            <div id="reasonsList"></div>
           </div>
         </div>
 
-        <div class="votes-grid" id="votesGrid"></div>
-
-        <div class="reasons-section hidden" id="reasonsSection">
-          <div class="reasons-title">Detection Signals</div>
-          <div id="reasonsList"></div>
-        </div>
+        <!-- Error -->
+        <div id="errorMsg" class="error-msg hidden"></div>
       </div>
-
-      <!-- Error -->
-      <div id="errorMsg" class="error-msg hidden"></div>
     </div>
+
+    <!-- Footer -->
+    <div class="footer">SECURED BY PHISHING DETECTOR PRO &mdash; v1.0</div>
   </div>
 
-  <!-- Footer -->
-  <div class="footer">SECURED BY PHISHING DETECTOR PRO &mdash; v1.0</div>
-
-  <script>
-    const API_URL = 'http://127.0.0.1:8000';
-    const urlInput = document.getElementById('urlInput');
-    const scanBtn = document.getElementById('scanBtn');
-    const resultCard = document.getElementById('resultCard');
-    const errorMsg = document.getElementById('errorMsg');
-    const statusDot = document.getElementById('statusDot');
-
-    // Auto-fill current tab URL
-    if (chrome?.tabs) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]?.url && !tabs[0].url.startsWith('chrome')) {
-          urlInput.value = tabs[0].url;
-        }
-      });
-    }
-
-    // Check backend health
-    async function checkBackend() {
-      try {
-        const r = await fetch(API_URL + '/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: 'https://healthcheck.internal' }),
-          signal: AbortSignal.timeout(3000),
-        });
-        statusDot.classList.remove('offline');
-        statusDot.title = 'Backend: Online';
-      } catch {
-        statusDot.classList.add('offline');
-        statusDot.title = 'Backend: Offline';
-      }
-    }
-    checkBackend();
-
-    // Scan
-    scanBtn.addEventListener('click', async () => {
-      const url = urlInput.value.trim();
-      if (!url) { urlInput.focus(); return; }
-
-      resultCard.classList.add('hidden');
-      errorMsg.classList.add('hidden');
-
-      // Show loading state
-      scanBtn.disabled = true;
-      scanBtn.innerHTML = '<div class="spinner"></div> Scanning...';
-
-      try {
-        const resp = await fetch(API_URL + '/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url }),
-        });
-
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-
-        renderResult(data);
-      } catch (err) {
-        errorMsg.textContent = '⚠ Backend error: ' + err.message;
-        errorMsg.classList.remove('hidden');
-      } finally {
-        scanBtn.disabled = false;
-        scanBtn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> Scan`;
-      }
-    });
-
-    // Enter key triggers scan
-    urlInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') scanBtn.click();
-    });
-
-    function renderResult(data) {
-      const verdict = (data.Verdict || 'SAFE').toUpperCase();
-      const score = data['Final Score'] || 0;
-      const votes = data.Votes || {};
-      const reasons = data.HeuristicReasons || [];
-
-      // Verdict class
-      const cls = verdict === 'PHISHING' ? 'phishing' : verdict === 'SUSPICIOUS' ? 'suspicious' : 'safe';
-      resultCard.className = 'result-card ' + cls;
-
-      // Icon
-      const icons = { safe: '✅', suspicious: '⚠️', phishing: '🚨' };
-      document.getElementById('verdictIcon').textContent = icons[cls];
-
-      // Text
-      document.getElementById('verdictText').textContent = verdict;
-      document.getElementById('scoreText').textContent = score.toFixed(1) + ' / 10';
-
-      // Score bar
-      document.getElementById('scoreBar').style.width = (score * 10) + '%';
-
-      // Votes
-      const votesGrid = document.getElementById('votesGrid');
-      votesGrid.innerHTML = '';
-      const voteLabels = [
-        ['legit', 'Legit', votes.legit || 0],
-        ['phishing', 'Phishing', votes.phishing || 0],
-        ['suspicious', 'Suspicious', votes.suspicious || 0],
-        ['uncertain', 'Uncertain', votes.uncertain || 0],
-      ];
-      voteLabels.forEach(([cls, label, count]) => {
-        votesGrid.innerHTML += `
-          <div class="vote-item">
-            <div class="vote-dot ${cls}"></div>
-            <span>${label}: <strong>${count}</strong></span>
-          </div>`;
-      });
-
-      // Reasons
-      const reasonsSection = document.getElementById('reasonsSection');
-      const reasonsList = document.getElementById('reasonsList');
-      if (reasons.length > 0) {
-        reasonsList.innerHTML = reasons.map(r => `<div class="reason-item">${r}</div>`).join('');
-        reasonsSection.classList.remove('hidden');
-      } else {
-        reasonsSection.classList.add('hidden');
-      }
-
-      resultCard.classList.remove('hidden');
-    }
-  </script>
+  <script src="popup.js" defer></script>
 </body>
 </html>
