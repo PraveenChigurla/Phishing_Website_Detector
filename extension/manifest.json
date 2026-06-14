@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "Scan URLs for phishing using multiple APIs",
   "action": {
-    "default_popup": "build/index.html",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icon.png",
       "48": "icon.png",
