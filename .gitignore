@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .env
+backend/.env
+backend/env
 *.sqlite3
 # Virtual environment
 venv/
