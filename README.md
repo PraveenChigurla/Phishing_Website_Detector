@@ -1,173 +1,301 @@
-# Phishing Detection with Extension 🚀
-A modern full‑stack phishing‑url detection system built with Django, Next.js (TSX) and PostgreSQL.
-## ✨ Overview
+# 🛡️ Phishing Website Detector
 
-**Phishing Detection with Extension** is a modern, full‑stack application that scans URLs for phishing threats using a **weighted heuristic engine** combined with **real‑time intelligence from three security vendors** (Google Safe Browsing, VirusTotal, and IPQualityScore).  It provides:
-- A **Django REST API** backend (PostgreSQL support, fallback to SQLite).
-- A **Next.js (App Router) TSX** frontend with a sleek, glass‑morphic UI.
-- **Dynamic scoring** that respects vendor consensus over noisy keyword heuristics, drastically reducing false‑positives (e.g., `checkphish.bolster.ai`).
-- Deployment‑ready Docker configuration and a **CLI client** for quick testing.
+A modern full-stack phishing URL detection system built with **Django**, **Next.js (TSX)**, and **PostgreSQL**. It combines a weighted heuristic scoring engine with real-time threat intelligence from four security vendor APIs to accurately classify URLs as **SAFE**, **SUSPICIOUS**, or **PHISHING** — while minimizing false positives.
 
-The project follows the tech‑stack preferences you requested: **Django**, **Next.js (TSX)**, **PostgreSQL**.
+---
+
+## ✨ Key Features
+
+- **Multi-layered detection** — 15+ heuristic signals (lexical, WHOIS, SSL, JavaScript, HTML content analysis) combined with external vendor consensus.
+- **Vendor-consensus priority** — External API verdicts override noisy heuristic signals. A URL like `checkphish.bolster.ai` won't be flagged just because it contains the word "phish".
+- **4 External Security APIs** — Google Safe Browsing, VirusTotal, IPQualityScore, and URLScan.io.
+- **Whitelist / Blacklist policies** — Admin-managed domain overrides for instant verdicts.
+- **Scan history** — Every scan is persisted with full evidence for audit & review.
+- **Chrome Extension** — Real-time phishing interception with a warning page before risky sites load.
+- **CLI Scanner** — Quick terminal-based URL scanning via `node index.js`.
+- **Glassmorphic UI** — A sleek, modern Next.js frontend with real-time scoring, vote breakdowns, and micro-animations.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Backend | Django | 6.0.4 |
-| Database | PostgreSQL (or SQLite for quick dev) | N/A |
-| Frontend | Next.js (App Router) with TypeScript (TSX) | 14.x |
-| Styling | TailwindCSS (custom theme) + Glassmorphism | 3.3 |
-| CLI | Node.js script (`index.js`) | 20.x |
-| Scoring Engine | Custom Python module (`services.py`) | – |
+| Layer | Technology | Details |
+|---|---|---|
+| **Backend** | Django 6.0 + Django REST Framework | REST API, scoring engine, database models |
+| **Frontend** | Next.js 14 (App Router, TypeScript/TSX) | Glassmorphic UI with TailwindCSS |
+| **Database** | PostgreSQL (primary) / SQLite (fallback) | Auto-fallback if `psycopg2` is not installed |
+| **CLI** | Node.js (ES Modules) | Interactive terminal scanner |
+| **Extension** | Chrome Extension (Manifest V3) | Background service worker + warning page |
 
 ---
 
-## 📦 Project Structure (clean & organized)
+## 📦 Project Structure
 
 ```
-Phishing_Detection_with_Extension/
+Phishing_Website_Detector/
 │
-├─ backend/                     # Django project
-│   ├─ phishing_backend/        # Settings, URLs, WSGI
-│   ├─ analyzer/               # Core scoring logic
-│   │   └─ services.py          # Heuristic + vendor aggregation
-│   ├─ run.py                  # Entry point (renamed from manage.py)
-│   └─ requirements.txt        # Python deps
+├── backend/                          # Django backend
+│   ├── phishing_backend/             # Django project settings
+│   │   ├── settings.py               # DB config, CORS, installed apps
+│   │   ├── urls.py                   # Root URL routing → /api/
+│   │   └── wsgi.py                   # WSGI entry point
+│   ├── analyzer/                     # Core analysis app
+│   │   ├── models.py                 # ScanHistory, DomainPolicy models
+│   │   ├── views.py                  # API views (AnalyzeURL, History, Policy)
+│   │   ├── services.py               # Heuristic engine + vendor integrations
+│   │   ├── serializers.py            # DRF serializers
+│   │   └── urls.py                   # /api/analyze, /api/history, /api/policy
+│   ├── run.py                        # Django management script (renamed from manage.py)
+│   └── .env                          # ⚠️ Environment variables (NOT committed)
 │
-├─ frontend/                    # Next.js app
-│   ├─ src/
-│   │   ├─ app/               # App Router pages (page.tsx, etc.)
-│   │   └─ components/        # UI components (HeuristicsTab.tsx, etc.)
-│   ├─ next.config.js
-│   └─ package.json
+├── frontend/                         # Next.js frontend
+│   ├── src/
+│   │   ├── app/                      # App Router
+│   │   │   ├── layout.tsx            # Root layout
+│   │   │   ├── page.tsx              # Main scanner page
+│   │   │   └── globals.css           # Global styles
+│   │   └── components/               # Reusable UI components
+│   │       ├── ScannerInput.tsx       # URL input form
+│   │       ├── VerdictCard.tsx        # Score + verdict display
+│   │       ├── HeuristicsTab.tsx      # Detailed heuristic breakdown
+│   │       ├── ApiFeedsTab.tsx        # External API results tab
+│   │       ├── PolicyManager.tsx      # Whitelist/Blacklist manager
+│   │       └── ScanHistoryLog.tsx     # Scan history viewer
+│   ├── package.json
+│   └── next.config.js
 │
-├─ index.js                     # CLI driver for quick URL checks
-├─ .env                         # Environment variables (API keys, DB URL)
-├─ README.md                    # <‑‑ you are reading this!
-└─ Dockerfile / docker-compose.yml (optional)
+├── extension/                        # Chrome Extension (Manifest V3)
+│   ├── manifest.json                 # Extension config
+│   ├── background.js                 # Service worker — intercepts navigation
+│   ├── warning.html                  # Phishing warning interstitial page
+│   └── icon.png                      # Extension icon
+│
+├── index.js                          # CLI scanner (Node.js)
+├── package.json                      # Root package.json for CLI
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## 🚀 Getting Started (Windows)
+## 🔑 Required API Keys
 
-### 1️⃣ Prerequisites
+This project integrates with **4 external security APIs**. You need to obtain free API keys from each:
 
-- **Python 3.11+** (add to `PATH`).
-- **Node.js 20+** and **npm**.
-- **PostgreSQL** (optional – SQLite works out‑of‑the‑box).
-- **Git** (for cloning the repo).
+| # | Service | Purpose | Get Your Key |
+|---|---------|---------|--------------|
+| 1 | **Google Safe Browsing** | Checks URLs against Google's threat database | [Google Cloud Console](https://console.cloud.google.com/apis/library/safebrowsing.googleapis.com) |
+| 2 | **VirusTotal** | Aggregates 70+ antivirus engine results for a URL | [VirusTotal API](https://www.virustotal.com/gui/join-us) |
+| 3 | **IPQualityScore** | Returns risk score, phishing/malware/suspicious flags | [IPQS Dashboard](https://www.ipqualityscore.com/create-account) |
+| 4 | **URLScan.io** | Submits URLs for deep scanning and screenshots | [URLScan API](https://urlscan.io/user/signup) |
 
-### 2️⃣ Clone the Repository
+> **All four APIs offer free tiers** that are sufficient for development and moderate usage.
 
-```powershell
+---
+
+## ⚙️ Environment Variables
+
+Create a file at **`backend/.env`** with the following variables:
+
+```env
+# Django configuration
+DEBUG=True
+SECRET_KEY=your-secret-key-change-in-production
+
+# Database Configuration (leave DB_PASSWORD empty to fall back to SQLite)
+DB_NAME=phishing_db
+DB_USER=postgres
+DB_PASSWORD=
+DB_HOST=127.0.0.1
+DB_PORT=5432
+
+# External Service API Keys (REQUIRED)
+GOOGLE_SAFE_BROWSING_API_KEY=your_google_api_key_here
+VIRUSTOTAL_API_KEY=your_virustotal_api_key_here
+IPQUALITYSCORE_API_KEY=your_ipqs_api_key_here
+URLSCAN_API_KEY=your_urlscan_api_key_here
+```
+
+> ⚠️ **This file is in `.gitignore` and must NEVER be committed to Git.** It contains sensitive API keys.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Python 3.11+** (with `pip`)
+- **Node.js 20+** (with `npm`)
+- **PostgreSQL** (optional — SQLite works out of the box)
+- **Git**
+
+### 1. Clone the Repository
+
+```bash
 git clone https://github.com/PraveenChigurla/Phishing_Website_Detector.git
-cd Phishing_Website_Detector  
+cd Phishing_Website_Detector
 ```
 
-### 3️⃣ Backend Setup
+### 2. Backend Setup
 
-```powershell
-# Create a virtual environment
+```bash
+# Create and activate a virtual environment
 python -m venv venv
+
+# Windows
 .\venv\Scripts\Activate.ps1
+# macOS/Linux
+source venv/bin/activate
 
-# Install dependencies
-pip install -r backend\requirements.txt
+# Install Python dependencies
+pip install -r backend/requirements.txt
 
-# Set up environment variables (copy .env.example → .env)
-copy .env.example .env
-# Edit .env to add your API keys and DB URL
+# Create the environment file
+cp backend/.env.example backend/.env
+# ✏️ Edit backend/.env and add your API keys
 
-# Initialise the DB (SQLite fallback works)
-python backend\run.py migrate
+# Run database migrations
+python backend/run.py migrate
 
-# Run the development server
-python backend\run.py runserver 8000
+# Start the Django development server
+python backend/run.py runserver 8000
 ```
 
-The API is now reachable at `http://127.0.0.1:8000/api/scan/`.
+The API is now live at **`http://127.0.0.1:8000/api/`**
 
-### 4️⃣ Frontend Setup
+### 3. Frontend Setup
 
-```powershell
+```bash
 cd frontend
 npm install
-npm run dev   # Starts Next.js at http://localhost:3000
+npm run dev
 ```
 
-### 5️⃣ CLI Quick Test
+The UI is now live at **`http://localhost:3000`**
 
-```powershell
-node index.js   # Prompts for a URL and prints the verdict
+### 4. CLI Scanner (Optional)
+
+```bash
+# From the project root
+npm install
+node index.js
 ```
+
+### 5. Chrome Extension (Optional)
+
+1. Open `chrome://extensions/` in Chrome.
+2. Enable **Developer mode** (top-right toggle).
+3. Click **Load unpacked** → select the `extension/` folder.
+4. The extension icon appears in your toolbar — it auto-scans every URL you visit.
 
 ---
 
-## 📡 API End‑point
+## 📡 API Endpoints
 
-**POST** `/api/scan/`
-```json
-{ "url": "https://example.com" }
-```
-**Response** (pretty‑printed):
+All endpoints are prefixed with `/api/`.
+
+| Method | Endpoint | Description | Body |
+|--------|----------|-------------|------|
+| `POST` | `/api/analyze` | Scan a URL and return verdict | `{ "url": "https://example.com" }` |
+| `GET` | `/api/history` | List all past scans (paginated) | — |
+| `GET` | `/api/policy` | List whitelist/blacklist rules | — |
+| `POST` | `/api/policy` | Add a whitelist/blacklist rule | `{ "domain": "example.com", "policy": "whitelist", "reason": "..." }` |
+| `POST` | `/api/urlscan` | Proxy scan to URLScan.io | `{ "url": "https://example.com" }` |
+| `GET` | `/api/ipquality?url=...` | Proxy scan to IPQualityScore | Query param: `url` |
+
+### Example Response (`POST /api/analyze`)
+
 ```json
 {
   "Verdict": "SAFE",
-  "Final Score": 6.1,
-  "HeuristicReasons": ["URL contains phishing-related keywords (weak signal)"],
-  "Votes": {"phishing":0,"suspicious":0,"legit":4,"uncertain":0},
-  "GoogleSafeBrowsing": {"status":"legit"},
-  "VirusTotal": {"status":"legit"},
-  "IPQualityScore": {"status":"legit"}
+  "Final Score": 6.0,
+  "HeuristicReasons": [],
+  "Votes": {
+    "phishing": 0,
+    "suspicious": 0,
+    "legit": 4,
+    "uncertain": 0
+  },
+  "GoogleSafeBrowsing": { "status": "legit", "message": "No threats found." },
+  "VirusTotal": { "status": "legit", "message": "Only 0 malicious detections out of 93." },
+  "IPQualityScore": { "status": "legit", "message": "Risk score: 0" },
+  "Lexical": [ 3.0, { "url_length": 28, "has_ip": false, "..." : "..." } ],
+  "WHOIS": [ 1, { "domain_age_days": 3650, "whois_success": true } ],
+  "SSL": [ 1, { "ssl_status": "Valid" } ]
 }
 ```
-The engine follows the **vendor‑consensus priority** described in the code comments.
 
 ---
 
-## 🎨 UI Highlights
+## 🧠 How the Scoring Engine Works
 
-> ![UI screenshot](file:///C:/Users/hp/.gemini/antigravity-ide/brain/71922486-792b-4c1d-89aa-c653b56f92e0/media__1781438776998.png)
+### Heuristic Signals (15+ features)
 
-The interface uses a glass‑morphic card with subtle micro‑animations, showing:
-- URL input box.
-- Real‑time scoring bar (0‑10).
-- Detailed breakdown of heuristic reasons and vendor votes.
+| Category | Signals Checked |
+|----------|-----------------|
+| **Lexical** | URL length, IP address in URL, `@` symbol, hex encoding, non-standard port, subdomain count, URL entropy, path depth |
+| **Keyword** | Phishing-related words in URL *(weak signal, only −0.5 penalty)* |
+| **WHOIS** | Domain age, registrar presence, RDAP fallback |
+| **SSL** | Certificate validity (Valid / Invalid / HTTP-only) |
+| **JavaScript** | Suspicious scripts (keyloggers, obfuscated eval, credential exfiltration) |
+| **HTML** | Password fields with external form actions, hidden iframes, external favicons |
+| **Free Hosting** | Detection of free platforms (vercel.app, netlify.app, github.io, etc.) |
+
+### Verdict Decision Rules
+
+```
+Rule 1: If ALL external APIs say "legit"           → SAFE   (vendor consensus wins)
+Rule 2: If 2+ APIs say "legit" & none say phishing → SAFE
+Rule 3: If Google Safe Browsing flags phishing      → PHISHING (authoritative)
+Rule 4: If 2+ sources say phishing                  → PHISHING
+Rule 5: If 1 phishing vote or 2+ suspicious         → SUSPICIOUS
+Rule 6: Heuristic suspicious + all APIs uncertain   → SUSPICIOUS
+Else:                                                → SAFE
+```
+
+### Score Ranges
+
+| Score | Verdict |
+|-------|---------|
+| 0.0 – 3.5 | 🔴 **PHISHING** |
+| 3.6 – 5.5 | 🟡 **SUSPICIOUS** |
+| 5.6 – 10.0 | 🟢 **SAFE** |
 
 ---
 
-## 🧪 Testing & Verification
+## 🧪 Testing
 
-1. **Run the Django test suite** (if you add tests later):
-   ```powershell
-   python backend\run.py test
-   ```
-2. **Manual verification** – open the frontend, try:
-   - `https://checkphish.bolster.ai` (should be **SAFE**).
-   - `https://phishing-website-flax.vercel.app` (should be **SUSPICIOUS**).
-   - `https://www.facebook.com` (should be **SAFE**).
+### Test URLs
+
+| URL | Expected Verdict | Why |
+|-----|------------------|-----|
+| `https://www.facebook.com` | ✅ SAFE | Well-known domain, all APIs confirm |
+| `https://checkphish.bolster.ai` | ✅ SAFE | Legitimate security company, vendor consensus overrides keyword |
+| `https://phishing-website-flax.vercel.app` | ⚠️ SUSPICIOUS | Free hosting + suspicious keyword + IPQS flags it |
+
+### Run Tests
+
+```bash
+python backend/run.py test
+```
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repo.
-2. Create a feature branch (`git checkout -b feature/awesome`).
-3. Follow the coding style (PEP‑8 for Python, ESLint/Prettier for TSX).
-4. Submit a Pull Request with a clear description and screenshots.
-
-Please keep the **heuristic weighting** consistent with the design notes in `services.py`.
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Follow coding standards: **PEP 8** (Python), **ESLint/Prettier** (TSX)
+4. Submit a Pull Request with a clear description
 
 ---
 
 ## 📄 License
 
-MIT License – feel free to use, modify, and distribute.
+MIT License — free to use, modify, and distribute.
 
 ---
 
-**Happy hunting!** 🎯
+## 👤 Author
+
+**Praveen Chigurla** — [GitHub](https://github.com/PraveenChigurla)
